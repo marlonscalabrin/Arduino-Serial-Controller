@@ -1,4 +1,6 @@
 Android/usbSerialForAndroid/build
 Android/build
 Android/ArduinoController/build
-
+Android/.gradle
+Android/.idea
+Android/ArduinoController/bin

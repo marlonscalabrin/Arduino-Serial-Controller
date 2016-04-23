@@ -7,8 +7,8 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        minSdkVersion 12
-        targetSdkVersion 19
+        minSdkVersion 15
+        targetSdkVersion 23
     }
 
     buildTypes {
@@ -16,6 +16,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+    dexOptions {
+        preDexLibraries = false
     }
 }
 
@@ -26,8 +29,9 @@ configurations {
     archives {
         extendsFrom configurations.default
     }
-}
 
+    all*.exclude group: 'com.android.support'
+}
 signing {
     required { has("release") && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives

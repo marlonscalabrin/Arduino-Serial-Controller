@@ -82,16 +82,16 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.button_send1:
-			mSerialConn.sendCommand("b1");
+			mSerialConn.sendCommand("a");
 			break;
 		case R.id.button_send2:
-			mSerialConn.sendCommand("b2");
+			mSerialConn.sendCommand("s");
 			break;
 		case R.id.button_send3:
-			mSerialConn.sendCommand("b3");
+			mSerialConn.sendCommand("d");
 			break;
 		case R.id.button_send4:
-			mSerialConn.sendCommand("b4");
+			mSerialConn.sendCommand("w");
 			break;
 		default:
 			break;
