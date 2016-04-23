@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ArduinoControllerActivity extends Activity implements View.OnClickListener {
 
@@ -60,6 +61,9 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		// Initialize Serial connector and starts Serial monitoring thread.
 		mSerialConn = new SerialConnector(mContext, mListener, mHandler);
 		mSerialConn.initialize();
+		if (!mSerialConn.isConnected()) {
+			Toast.makeText(this, "Não foi possível conectar. :( Por favor feche a aplicação e tente novamente.", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override

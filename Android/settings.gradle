@@ -1,0 +1,5 @@
+include ':ArduinoController'
+project(':ArduinoController').projectDir = new File(settingsDir, './ArduinoController')
+
+include ':usbSerialForAndroid'
+project(':usbSerialForAndroid').projectDir = new File(settingsDir, './usbSerialForAndroid')

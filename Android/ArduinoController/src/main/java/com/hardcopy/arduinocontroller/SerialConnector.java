@@ -37,7 +37,10 @@ public class SerialConnector {
 	public static final int TARGET_VENDOR_ID4 = 6790;	// CH340G
 	public static final int TARGET_VENDOR_ID5 = 4292;	// CP210x
 	public static final int BAUD_RATE = 115200;
-	
+
+	public boolean isConnected() {
+		return mPort != null;
+	}
 	
 	/*****************************************************
 	*	Constructor, Initialize
@@ -51,16 +54,21 @@ public class SerialConnector {
 	
 	public void initialize() {
 		UsbManager manager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+
+		try {
+			List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+			if (availableDrivers.isEmpty()) {
+				mListener.onReceive(Constants.MSG_SERIAL_ERROR, 0, 0, "Error: There is no available device. \n", null);
+				return;
+			}
 		
-		List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-		if (availableDrivers.isEmpty()) {
-			mListener.onReceive(Constants.MSG_SERIAL_ERROR, 0, 0, "Error: There is no available device. \n", null);
-			return;
-		}
-		
-		mDriver = availableDrivers.get(0);
-		if(mDriver == null) {
-			mListener.onReceive(Constants.MSG_SERIAL_ERROR, 0, 0, "Error: Driver is Null \n", null);
+			mDriver = availableDrivers.get(0);
+			if(mDriver == null) {
+				mListener.onReceive(Constants.MSG_SERIAL_ERROR, 0, 0, "Error: Driver is Null \n", null);
+				return;
+			}
+		} catch (NullPointerException e) {
+			e.printStackTrace();
 			return;
 		}
 		
