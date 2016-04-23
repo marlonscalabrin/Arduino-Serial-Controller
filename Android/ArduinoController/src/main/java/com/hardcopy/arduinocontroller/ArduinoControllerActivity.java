@@ -3,8 +3,6 @@ package com.hardcopy.arduinocontroller;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.View;
@@ -14,9 +12,8 @@ import android.widget.Toast;
 
 public class ArduinoControllerActivity extends Activity implements View.OnClickListener {
 
-	private Context mContext = null;
-	private UsbCommunication mSerialConn = null;
-	private ReadListener readListener;
+	private Context context = null;
+	private Communication communication = null;
 	
 	private TextView mTextLog = null;
 	private TextView mTextInfo = null;
@@ -30,7 +27,7 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		super.onCreate(savedInstanceState);
 		
 		// System
-		mContext = getApplicationContext();
+		context = getApplicationContext();
 		
 		// Layouts
 		setContentView(R.layout.activity_arduino_controller);
@@ -49,7 +46,7 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		mButton4.setOnClickListener(this);
 		
 		// Initialize
-		readListener = new ReadListener() {
+		InputListener inputListener = new InputListener() {
 			@Override
 			public void onRead(String message) {
 				mTextInfo.setText((String) message);
@@ -64,9 +61,9 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		};
 		
 		// Initialize Serial connector and starts Serial monitoring thread.
-		mSerialConn = new UsbCommunication();
-		mSerialConn.start(this, readListener);
-		if (!mSerialConn.isConnected()) {
+		communication = new UsbCommunication();
+		communication.start(this, inputListener);
+		if (!communication.isConnected()) {
 			Toast.makeText(this, "Não foi possível conectar. :( Por favor feche a aplicação e tente novamente.", Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -80,23 +77,23 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 	public void onDestroy() {
 		super.onDestroy();
 		
-		mSerialConn.finalize();
+		communication.stop();
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.button_send1:
-			mSerialConn.send("a");
+			communication.send("a");
 			break;
 		case R.id.button_send2:
-			mSerialConn.send("s");
+			communication.send("s");
 			break;
 		case R.id.button_send3:
-			mSerialConn.send("d");
+			communication.send("d");
 			break;
 		case R.id.button_send4:
-			mSerialConn.send("w");
+			communication.send("w");
 			break;
 		default:
 			break;

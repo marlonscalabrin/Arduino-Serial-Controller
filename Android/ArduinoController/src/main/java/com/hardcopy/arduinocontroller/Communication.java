@@ -12,11 +12,13 @@ import android.util.Log;
  * Created by marlon on 14/04/16.
  */
 public abstract class Communication {
-    public abstract void start(Activity context, ReadListener readListener);
+    public abstract void start(Activity context, InputListener inputListener);
     public abstract void stop();
 
     public abstract void send(String message);
     public abstract void onActivityResult(int requestCode, int resultCode, Intent data);
+
+    public abstract boolean isConnected();
 
     protected void buildNotification(Context context, String text, int icon) {
         Log.d("Communication", text);

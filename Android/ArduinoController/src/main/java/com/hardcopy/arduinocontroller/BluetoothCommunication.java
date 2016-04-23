@@ -14,25 +14,25 @@ import app.akexorcist.bluetotohspp.library.DeviceList;
 public class BluetoothCommunication extends Communication {
 
     private BluetoothSPP bt;
-    private ReadListener readListener;
+    private InputListener inputListener;
     private boolean isConnected = false;
     private String bluetoothName;
 
     @Override
-    public void start(final Activity context, ReadListener readListener) {
+    public void start(final Activity context, InputListener inputListener) {
         if (bt != null && !isConnected);
             autoConnect();
         this.bt = new BluetoothSPP(context);
-        this.readListener = readListener;
+        this.inputListener = inputListener;
         this.bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
-                BluetoothCommunication.this.readListener.onRead(message);
+                BluetoothCommunication.this.inputListener.onRead(message);
             }
         });
         this.bt.setBluetoothStateListener(new BluetoothSPP.BluetoothStateListener() {
                                                 public void onServiceStateChanged(int state) {
                                                     if (state == BluetoothState.STATE_CONNECTED) {
-                                                        buildNotification(context, "Bluetooth Conectado. (s)", R.drawable.bluetooth);
+                                                        buildNotification(context, "Bluetooth Conectado. (s)", android.R.drawable.ic_dialog_info);
                                                         isConnected = true;
                                                     } else if (state == BluetoothState.STATE_LISTEN) {
                                                         autoConnect();
@@ -43,32 +43,32 @@ public class BluetoothCommunication extends Communication {
         );
         this.bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
             public void onDeviceConnected(String name, String address) {
-                buildNotification(context, "Bluetooth conectado. (d)", R.drawable.bluetooth);
+                buildNotification(context, "Bluetooth conectado. (d)", android.R.drawable.ic_dialog_info);
             }
 
             public void onDeviceDisconnected() {
-                buildNotification(context, "Bluetooth desconectado.", R.drawable.bluetooth);
+                buildNotification(context, "Bluetooth desconectado.", android.R.drawable.ic_dialog_info);
                 autoConnect();
             }
 
             public void onDeviceConnectionFailed() {
                 //Toast.makeText(getApplicationContext(), "Falha na conexao", Toast.LENGTH_SHORT).show();
-                buildNotification(context, "Falha na conexão com o Bluetooth.", R.drawable.bluetooth);
+                buildNotification(context, "Falha na conexão com o Bluetooth.", android.R.drawable.ic_dialog_info);
                 autoConnect();
             }
         });
         this.bt.setAutoConnectionListener(new BluetoothSPP.AutoConnectionListener() {
             public void onNewConnection(String name, String address) {
-                buildNotification(context, "Conectando Bluetooth. (n)", R.drawable.bluetooth);
+                buildNotification(context, "Conectando Bluetooth. (n)", android.R.drawable.ic_dialog_info);
             }
 
             public void onAutoConnectionStarted() {
-                buildNotification(context, "Conectando Bluetooth. (ac)", R.drawable.bluetooth);
+                buildNotification(context, "Conectando Bluetooth. (ac)", android.R.drawable.ic_dialog_info);
             }
         });
 
         if (!isConnected) {
-            buildNotification(context, "Procurando Bluetooth.", R.drawable.bluetooth);
+            buildNotification(context, "Procurando Bluetooth.", android.R.drawable.ic_dialog_info);
             this.bt.startDiscovery();
         }
 
@@ -87,6 +87,11 @@ public class BluetoothCommunication extends Communication {
             Intent intent = new Intent(context.getApplicationContext(), DeviceList.class);
             context.startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
         }
+    }
+
+    @Override
+    public boolean isConnected() {
+        return isConnected;
     }
 
     @Override
