@@ -196,14 +196,13 @@ public class UsbCommunication extends Communication {
 							// Extract data from buffer
 							for(int i=0; i<numBytesRead; i++) {
 								char c = (char)buffer[i];
-								if(c == 'z') {
+								if(c == '\n') {
 									// This is end signal. Send collected result to UI
-									if(mCmd.mStringBuffer != null && mCmd.mStringBuffer.length() < 20) {
-										readListener.onRead( mCmd.toString());
+									if (mCmd.mStringBuffer != null && mCmd.mStringBuffer.length() < 20) {
+										readListener.onRead(mCmd.toString());
 									}
-								} else {
-									mCmd.addChar(c);
 								}
+								mCmd.addChar(c);
 							}
 						} // End of if(numBytesRead > 0)
 					}
