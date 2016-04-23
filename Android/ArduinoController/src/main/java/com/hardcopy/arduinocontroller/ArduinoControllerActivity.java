@@ -1,9 +1,5 @@
 package com.hardcopy.arduinocontroller;
 
-import com.hardcopy.arduinocontroller.R;
-import com.hardcopy.arduinocontroller.Constants;
-import com.hardcopy.arduinocontroller.SerialConnector;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -19,10 +15,8 @@ import android.widget.Toast;
 public class ArduinoControllerActivity extends Activity implements View.OnClickListener {
 
 	private Context mContext = null;
-	private ActivityHandler mHandler = null;
-	
-	private SerialListener mListener = null;
-	private SerialConnector mSerialConn = null;
+	private UsbCommunication mSerialConn = null;
+	private ReadListener readListener;
 	
 	private TextView mTextLog = null;
 	private TextView mTextInfo = null;
@@ -55,12 +49,23 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		mButton4.setOnClickListener(this);
 		
 		// Initialize
-		mListener = new SerialListener();
-		mHandler = new ActivityHandler();
+		readListener = new ReadListener() {
+			@Override
+			public void onRead(String message) {
+				mTextInfo.setText((String) message);
+				mTextLog.append((String) message);
+				mTextLog.append("\n");
+			}
+
+			@Override
+			public void onError(String error) {
+				Toast.makeText(ArduinoControllerActivity.this, error, Toast.LENGTH_SHORT).show();
+			}
+		};
 		
 		// Initialize Serial connector and starts Serial monitoring thread.
-		mSerialConn = new SerialConnector(mContext, mListener, mHandler);
-		mSerialConn.initialize();
+		mSerialConn = new UsbCommunication();
+		mSerialConn.start(this, readListener);
 		if (!mSerialConn.isConnected()) {
 			Toast.makeText(this, "Não foi possível conectar. :( Por favor feche a aplicação e tente novamente.", Toast.LENGTH_SHORT).show();
 		}
@@ -82,79 +87,20 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.button_send1:
-			mSerialConn.sendCommand("a");
+			mSerialConn.send("a");
 			break;
 		case R.id.button_send2:
-			mSerialConn.sendCommand("s");
+			mSerialConn.send("s");
 			break;
 		case R.id.button_send3:
-			mSerialConn.sendCommand("d");
+			mSerialConn.send("d");
 			break;
 		case R.id.button_send4:
-			mSerialConn.sendCommand("w");
+			mSerialConn.send("w");
 			break;
 		default:
 			break;
 		}
 	}
-	
-	
-	public class SerialListener {
-		public void onReceive(int msg, int arg0, int arg1, String arg2, Object arg3) {
-			switch(msg) {
-			case Constants.MSG_DEVICD_INFO:
-				mTextLog.append(arg2);
-				break;
-			case Constants.MSG_DEVICE_COUNT:
-				mTextLog.append(Integer.toString(arg0) + " device(s) found \n");
-				break;
-			case Constants.MSG_READ_DATA_COUNT:
-				mTextLog.append(Integer.toString(arg0) + " buffer received \n");
-				break;
-			case Constants.MSG_READ_DATA:
-				if(arg3 != null) {
-					mTextInfo.setText((String)arg3);
-					mTextLog.append((String)arg3);
-					mTextLog.append("\n");
-				}
-				break;
-			case Constants.MSG_SERIAL_ERROR:
-				mTextLog.append(arg2);
-				break;
-			case Constants.MSG_FATAL_ERROR_FINISH_APP:
-				finish();
-				break;
-			}
-		}
-	}
-	
-	public class ActivityHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what) {
-			case Constants.MSG_DEVICD_INFO:
-				mTextLog.append((String)msg.obj);
-				break;
-			case Constants.MSG_DEVICE_COUNT:
-				mTextLog.append(Integer.toString(msg.arg1) + " device(s) found \n");
-				break;
-			case Constants.MSG_READ_DATA_COUNT:
-				mTextLog.append(((String)msg.obj) + "\n");
-				break;
-			case Constants.MSG_READ_DATA:
-				if(msg.obj != null) {
-					mTextInfo.setText((String)msg.obj);
-					mTextLog.append((String)msg.obj);
-					mTextLog.append("\n");
-				}
-				break;
-			case Constants.MSG_SERIAL_ERROR:
-				mTextLog.append((String)msg.obj);
-				break;
-			}
-		}
-	}
-	
-	
-	
+
 }
