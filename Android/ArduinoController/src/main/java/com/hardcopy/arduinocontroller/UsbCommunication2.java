@@ -30,7 +30,7 @@ public class UsbCommunication2 extends Communication {
     private static UsbSerialPort sPort = null;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private SerialInputOutputManager mSerialIoManager;
-    private ReadListener readListener;
+    private InputListener inputListener;
     private UsbManager usbManager;
     private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
@@ -52,9 +52,14 @@ public class UsbCommunication2 extends Communication {
     };
 
     @Override
-    public void start(Activity context, ReadListener readListener) {
+    public boolean isConnected() {
+        return sPort != null;
+    }
+
+    @Override
+    public void start(Activity context, InputListener inputListener) {
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
-        this.readListener = readListener;
+        this.inputListener = inputListener;
 
         this.sPort = getPortArduino();
         if (this.mListener == null) {
@@ -119,7 +124,7 @@ public class UsbCommunication2 extends Communication {
 
     private void updateReceivedData(byte[] data) {
         final String message = HexDump.dumpHexString(data);
-        readListener.onRead(message);
+        inputListener.onRead(message);
     }
 
     @Override

@@ -79,7 +79,7 @@ public class UsbCommunication extends Communication {
 		
 		try {
 			mPort.open(connection);
-			mPort.setParameters(BAUD_RATE, 8, 1, 0);
+			mPort.setParameters(BAUD_RATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 		} catch (IOException e) {
 			// Deal with error.
 			inputListener.onError("Error: Cannot open port \n" + e.toString() + "\n");

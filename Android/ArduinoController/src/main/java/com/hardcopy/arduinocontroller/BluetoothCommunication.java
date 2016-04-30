@@ -16,12 +16,14 @@ public class BluetoothCommunication extends Communication {
     private BluetoothSPP bt;
     private InputListener inputListener;
     private boolean isConnected = false;
-    private String bluetoothName;
+    private boolean isConnecting = false;
+    private String bluetoothAddress;
+    private Activity context;
+
 
     @Override
     public void start(final Activity context, InputListener inputListener) {
-        if (bt != null && !isConnected);
-            autoConnect();
+        this.context = context;
         this.bt = new BluetoothSPP(context);
         this.inputListener = inputListener;
         this.bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
@@ -33,6 +35,7 @@ public class BluetoothCommunication extends Communication {
                                                 public void onServiceStateChanged(int state) {
                                                     if (state == BluetoothState.STATE_CONNECTED) {
                                                         buildNotification(context, "Bluetooth Conectado. (s)", android.R.drawable.ic_dialog_info);
+                                                        isConnecting = false;
                                                         isConnected = true;
                                                     } else if (state == BluetoothState.STATE_LISTEN) {
                                                         autoConnect();
@@ -54,9 +57,11 @@ public class BluetoothCommunication extends Communication {
             public void onDeviceConnectionFailed() {
                 //Toast.makeText(getApplicationContext(), "Falha na conexao", Toast.LENGTH_SHORT).show();
                 buildNotification(context, "Falha na conexão com o Bluetooth.", android.R.drawable.ic_dialog_info);
+                isConnecting = false;
                 autoConnect();
             }
         });
+
         this.bt.setAutoConnectionListener(new BluetoothSPP.AutoConnectionListener() {
             public void onNewConnection(String name, String address) {
                 buildNotification(context, "Conectando Bluetooth. (n)", android.R.drawable.ic_dialog_info);
@@ -104,17 +109,27 @@ public class BluetoothCommunication extends Communication {
 
     public void autoConnect() {
         isConnected = false;
-        if (!this.bt.isBluetoothAvailable()) {
+        if (this.bt == null || !this.bt.isBluetoothAvailable()) {
             return;
         }
         try {
-            if (!this.bt.isAutoConnecting()) {
+            if (!isConnecting) {
                 this.bt.startDiscovery();
-                this.bt.autoConnect(bluetoothName);
+                if (bluetoothAddress == null) {
+                    Intent intent = new Intent(context.getApplicationContext(), DeviceList.class);
+                    context.startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
+                } else {
+                    connect();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void connect() {
+        this.isConnecting = true;
+        this.bt.connect(bluetoothAddress);
     }
 
 
@@ -129,8 +144,8 @@ public class BluetoothCommunication extends Communication {
             if(resultCode == Activity.RESULT_OK) {
                 String address = data.getExtras().getString(BluetoothState.EXTRA_DEVICE_ADDRESS);
                 BluetoothDevice device = bt.getBluetoothAdapter().getRemoteDevice(address);
-                bluetoothName = device.getName();
-                this.bt.connect(data);
+                bluetoothAddress = device.getAddress();
+                connect();
             }
         } else if(requestCode == BluetoothState.REQUEST_ENABLE_BT) {
             if(resultCode == Activity.RESULT_OK) {

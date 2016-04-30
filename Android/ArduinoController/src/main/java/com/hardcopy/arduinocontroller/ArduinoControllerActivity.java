@@ -2,6 +2,7 @@ package com.hardcopy.arduinocontroller;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -61,11 +62,14 @@ public class ArduinoControllerActivity extends Activity implements View.OnClickL
 		};
 		
 		// Initialize Serial connector and starts Serial monitoring thread.
-		communication = new UsbCommunication();
+		communication = new BluetoothCommunication();
 		communication.start(this, inputListener);
 		if (!communication.isConnected()) {
 			Toast.makeText(this, "Não foi possível conectar. :( Por favor feche a aplicação e tente novamente.", Toast.LENGTH_SHORT).show();
 		}
+	}
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		communication.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
